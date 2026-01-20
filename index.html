@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cotizador Universal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-dark: #1A2935;
+            --card-bg: #243447;
+            --input-bg: #3A4B5F;
+            --gold: #D4AF37;
+            --white: #FFFFFF;
+            --silver: #B0BCC7;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #0f1720 100%);
+            color: var(--white);
+            margin: 0;
+            padding: 10px;
+            min-height: 100vh;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #boletaView, #boletaView * { visibility: visible; }
+            #boletaView { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; border: none; }
+            .container { display: none; }
+        }
+
+        .container {
+            max-width: 500px; margin: 0 auto; background-color: var(--card-bg);
+            border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05); position: relative; 
+        }
+
+        .settings-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; z-index: 10; }
+
+        h1 { color: var(--gold); text-align: center; font-size: 20px; margin: 5px 0; text-transform: uppercase; }
+        .subtitle { text-align: center; color: var(--silver); font-size: 11px; margin-bottom: 15px; }
+        
+        label { font-size: 12px; color: var(--silver); display: block; margin-bottom: 5px; }
+        .input-group { margin-bottom: 12px; }
+        
+        input, select {
+            width: 100%; background: var(--input-bg); border: 1px solid transparent; color: white;
+            padding: 12px; border-radius: 10px; font-size: 14px; box-sizing: border-box; outline: none;
+        }
+        input:focus, select:focus { border-color: var(--gold); }
+
+        .row { display: flex; gap: 10px; }
+        .col { flex: 1; }
+
+        /* PANEL CONFIGURACIÓN EXPANDIDO */
+        #configPanel { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed var(--gold); display: none; }
+        .config-section-title { color: var(--gold); font-weight: bold; margin-top: 10px; margin-bottom: 5px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #555; padding-bottom: 3px; }
+        input[type="range"] { width: 100%; margin: 10px 0; accent-color: var(--gold); }
+
+        .chip-group { display: flex; gap: 10px; background: var(--input-bg); padding: 5px; border-radius: 10px; }
+        .chip-input { display: none; }
+        .chip-label { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 12px; cursor: pointer; color: var(--silver); transition: 0.3s; }
+        .chip-input:checked + .chip-label { background: var(--gold); color: #1A2935; font-weight: bold; }
+
+        .result-box {
+            background: rgba(0,0,0,0.2); border: 1px solid var(--gold); border-radius: 15px;
+            padding: 15px; text-align: center; margin-top: 15px;
+        }
+        .total-price { font-size: 36px; color: var(--gold); font-weight: bold; margin: 0; }
+
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-gold { background: var(--gold); color: #1A2935; }
+        .btn-blue { background: #3498db; color: white; }
+        .btn-green { background: #27ae60; color: white; } 
+        .btn-outline { background: transparent; border: 1px solid var(--silver); color: var(--silver); }
+
+        /* --- BOLETA --- */
+        #boletaContainer { display: none; }
+        #boletaView {
+            background: white; color: black; padding: 25px; 
+            position: relative; font-family: Arial, sans-serif;
+        }
+
+        .watermark {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 250px; height: 250px;
+            background-image: url('logo.png'); background-size: contain;
+            background-repeat: no-repeat; background-position: center;
+            opacity: 0.1; pointer-events: none; z-index: 0;
+        }
+
+        .boleta-top-code { position: absolute; top: 20px; right: 25px; font-size: 12px; font-weight: bold; color: #333; }
+        .boleta-header { display: flex; justify-content: space-between; margin-top: 30px; margin-bottom: 20px; position: relative; z-index: 1; }
+        
+        .logo-area {
+            width: 70px; height: 70px; background: #fff; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid #D4AF37; overflow: hidden;
+        }
+        .logo-area img { width: 100%; height: 100%; object-fit: contain; }
+
+        .company-info { text-align: right; font-size: 11px; line-height: 1.4; color: #444; }
+        .company-info h2 { font-size: 16px; margin: 0 0 5px 0; color: #000; font-weight: bold; }
+
+        .client-section { margin-bottom: 15px; font-size: 12px; position: relative; z-index: 1; }
+        .client-section h3 { font-size: 12px; border-bottom: 1px solid #ccc; display: inline-block; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
+        .client-data p { margin: 3px 0; }
+
+        .install-box {
+            background-color: #fcf8e3; border-left: 4px solid #D4AF37;
+            padding: 10px; margin: 10px 0; font-size: 11px; color: #8a6d3b;
+            position: relative; z-index: 1; display: none;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 20px; position: relative; z-index: 1; }
+        th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 8px; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        .totals-area { float: right; width: 60%; font-size: 12px; position: relative; z-index: 1; }
+        .totals-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .final-total { font-weight: bold; font-size: 14px; border-top: 2px solid #000; padding-top: 5px; margin-top: 5px; }
+
+        .terms { clear: both; padding-top: 40px; font-size: 9px; color: #666; text-align: justify; position: relative; z-index: 1; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="calculatorView">
+    <button class="settings-btn" onclick="toggleConfig()">⚙️</button>
+    
+    <h1 id="appTitle">Cotizador Vidrios</h1> <p class="subtitle">Sistema Universal v11</p>
+
+    <div id="configPanel">
+        <div class="config-section-title">🏢 DATOS DE TU EMPRESA</div>
+        <label>Nombre del Negocio:</label>
+        <input type="text" id="configEmpresa" placeholder="Ej: Dazoru Projects" oninput="guardarConfig()">
+        
+        <label>Celulares (Separa con /):</label>
+        <input type="text" id="configCelulares" placeholder="Ej: 999 999 999 / 988 888 888" oninput="guardarConfig()">
+        
+        <label>Correo Electrónico:</label>
+        <input type="text" id="configCorreo" placeholder="Ej: contacto@miempresa.com" oninput="guardarConfig()">
+
+        <div class="config-section-title" style="margin-top:15px">🎨 MARCA DE AGUA</div>
+        <label>Cargar Logo:</label>
+        <input type="file" id="logoInput" accept="image/*" onchange="cargarLogoManual()">
+        <label>Transparencia:</label>
+        <input type="range" id="opacityRange" min="0" max="0.5" step="0.01" value="0.1" oninput="ajustarOpacidad()">
+    </div>
+
+    <div class="input-group">
+        <label>👤 Cliente</label>
+        <div class="row">
+            <input type="text" id="clienteNombre" placeholder="Nombre" class="col">
+            <input type="text" id="clienteTelefono" placeholder="Celular" class="col">
+        </div>
+        <input type="text" id="clienteDireccion" placeholder="Dirección" style="margin-top:5px;">
+    </div>
+
+    <div class="input-group">
+        <label>📏 Medidas (cm)</label>
+        <div class="chip-group" style="margin-bottom: 10px;">
+            <input type="radio" name="forma" id="rect" value="rect" class="chip-input" checked onchange="calcular()">
+            <label for="rect" class="chip-label">⬜ Rect</label>
+            <input type="radio" name="forma" id="circ" value="circ" class="chip-input" onchange="calcular()">
+            <label for="circ" class="chip-label">⚪ Circ</label>
+        </div>
+        <div class="row">
+            <div class="col"><input type="number" id="ancho" placeholder="Ancho" oninput="calcular()"></div>
+            <div class="col" id="colAlto"><input type="number" id="alto" placeholder="Alto" oninput="calcular()"></div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>💎 Material y Cantidad</label>
+        <select id="tipoVidrio" onchange="calcular()" style="margin-bottom:8px;">
+            <option value="marco_madera">Espejo con Marco de Madera</option>
+            <option value="3mm">Espejo 3mm Económico</option>
+            <option value="4mm_chino_pulido">Espejo 4mm Chino PULIDO</option>
+            <option value="4mm_chino_bisel">Espejo 4mm Chino BISELADO</option>
+            <option value="4mm_opti_pulido">Espejo 4mm Optimirror PULIDO</option>
+            <option value="4mm_opti_bisel">Espejo 4mm Optimirror BISELADO</option>
+        </select>
+        
+        <div class="row">
+            <div class="col">
+                <select id="sistemaLed" onchange="calcular()">
+                    <option value="none">Sin Luz LED</option>
+                    <option value="halo_1">Halo - 1 Tono</option>
+                    <option value="halo_3">Halo - 3 Tonos</option>
+                    <option value="arenado_1">Arenada - 1 Tono</option>
+                    <option value="arenado_3">Arenada - 3 Tonos</option>
+                </select>
+            </div>
+            <div class="col" style="flex: 0.5;">
+                <input type="number" id="cantidad" value="1" min="1" placeholder="Cant." oninput="calcular()" style="text-align:center; border: 2px solid var(--gold);">
+            </div>
+        </div>
+    </div>
+
+    <div class="row input-group">
+        <div class="col"><label>🚚 Envío (S/)</label><input type="number" id="costoEnvio" placeholder="0" oninput="calcular()"></div>
+        <div class="col"><label>🛠️ Instalación (S/)</label><input type="number" id="costoInstalacion" placeholder="0" oninput="calcular()"></div>
+    </div>
+    
+    <div class="input-group">
+         <label>📅 Instalación</label>
+         <input type="datetime-local" id="fechaInstalacion">
+    </div>
+
+    <div class="input-group">
+         <label>🎁 Descuento (S/)</label>
+         <input type="number" id="descuento" placeholder="0" oninput="calcular()">
+    </div>
+
+    <div class="result-box">
+        <div style="font-size: 10px; color: var(--silver); letter-spacing: 1px;">TOTAL A COBRAR</div>
+        <div class="total-price" id="precioFinalDisplay">S/ 0.00</div>
+    </div>
+
+    <button class="btn btn-gold" onclick="generarBoleta()">Generar Boleta 📄</button>
+    <button class="btn btn-outline" onclick="resetForm()">Limpiar 🔄</button>
+</div>
+
+<div class="container" id="boletaContainer">
+    <button class="btn btn-outline" onclick="volverCalculadora()" style="margin-bottom:15px; color: #333; border-color: #ccc;">⬅️ Editar Datos</button>
+
+    <div id="boletaView">
+        <div class="watermark" id="watermark"></div> 
+        <div class="boleta-top-code" id="boletaCode">B001-000000</div>
+
+        <div class="boleta-header">
+            <div class="logo-area">
+                <img id="logoBoleta" src="logo.png" onerror="this.style.display='none'" alt="Logo">
+            </div>
+            <div class="company-info">
+                <h2>Boleta de Venta</h2>
+                <strong id="bolEmpresa">Nombre Empresa</strong><br>
+                Lima, Perú<br>
+                Cel: <span id="bolCelulares">---</span><br>
+                Correo: <span id="bolCorreo">---</span>
+            </div>
+        </div>
+
+        <div class="client-section">
+            <h3>Detalles del cliente:</h3>
+            <div class="client-data">
+                <p><strong>Nombre:</strong> <span id="bolCliente">---</span></p>
+                <p><strong>Teléfono:</strong> <span id="bolTelefono">---</span></p>
+                <p><strong>Dirección:</strong> <span id="bolDireccion">---</span></p>
+                <p><strong>Fecha Emisión:</strong> <span id="bolFecha">---</span></p>
+            </div>
+        </div>
+
+        <div class="install-box" id="bolInstallBox">
+            📅 <strong>INSTALACIÓN:</strong> <span id="bolFechaInstalacion">---</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th class="text-center">Cant.</th>
+                    <th class="text-right">P. Unit.</th>
+                    <th class="text-right">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="bolTabla"></tbody>
+        </table>
+
+        <div class="totals-area">
+            <div class="totals-row"><span>Subtotal Prod:</span><span id="bolSubtotal">S/ 0.00</span></div>
+            <div class="totals-row"><span>Envío:</span><span id="bolEnvio">S/ 0.00</span></div>
+            <div class="totals-row"><span>Instalación:</span><span id="bolInstalacion">S/ 0.00</span></div>
+            <div class="totals-row" style="color: #d9534f;"><span>Descuento:</span><span id="bolDescuento">- S/ 0.00</span></div>
+            <div class="totals-row final-total"><span>TOTAL:</span><span id="bolTotalFinal">S/ 0.00</span></div>
+        </div>
+
+        <div class="terms">
+            <strong>Términos y Condiciones:</strong> La oferta es válida por 15 días. El tiempo estimado de entrega es de 3 a 5 días hábiles. Aceptamos pagos por Yape, Plin y Transferencia Bancaria. Una vez procesado el vidrio, no se aceptan devoluciones por cambio de medida.
+        </div>
+    </div>
+
+    <button class="btn btn-blue" onclick="descargarImagen()">📥 Descargar Imagen (Requiere Internet)</button>
+    <button class="btn btn-green" onclick="window.print()">🖨️ Guardar PDF (100% Offline)</button>
+</div>
+
+<script>
+    // AL CARGAR LA PÁGINA: RECUPERAR CONFIGURACIÓN GUARDADA
+    window.onload = function() {
+        if(localStorage.getItem('empresa')) document.getElementById('configEmpresa').value = localStorage.getItem('empresa');
+        else document.getElementById('configEmpresa').value = "Dazoru Projects"; // Por defecto
+
+        if(localStorage.getItem('celulares')) document.getElementById('configCelulares').value = localStorage.getItem('celulares');
+        else document.getElementById('configCelulares').value = "930 132 709 / 958 786 703"; // Por defecto
+
+        if(localStorage.getItem('correo')) document.getElementById('configCorreo').value = localStorage.getItem('correo');
+        else document.getElementById('configCorreo').value = "dazoruprojects@gmail.com"; // Por defecto
+    };
+
+    function guardarConfig() {
+        const empresa = document.getElementById('configEmpresa').value;
+        const celulares = document.getElementById('configCelulares').value;
+        const correo = document.getElementById('configCorreo').value;
+
+        localStorage.setItem('empresa', empresa);
+        localStorage.setItem('celulares', celulares);
+        localStorage.setItem('correo', correo);
+    }
+
+    function toggleConfig() {
+        const panel = document.getElementById('configPanel');
+        panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function cargarLogoManual() {
+        const input = document.getElementById('logoInput');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('watermark').style.backgroundImage = `url('${e.target.result}')`;
+                const logoImg = document.getElementById('logoBoleta');
+                logoImg.src = e.target.result;
+                logoImg.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function ajustarOpacidad() {
+        document.getElementById('watermark').style.opacity = document.getElementById('opacityRange').value;
+    }
+
+    function calcular() {
+        const forma = document.querySelector('input[name="forma"]:checked').value;
+        const ancho = parseFloat(document.getElementById('ancho').value) || 0;
+        let alto = parseFloat(document.getElementById('alto').value) || 0;
+        const cantidad = parseFloat(document.getElementById('cantidad').value) || 1;
+
+        if (forma === 'circ') {
+            document.getElementById('colAlto').style.display = 'none';
+            alto = ancho; 
+        } else {
+            document.getElementById('colAlto').style.display = 'block';
+        }
+
+        if (ancho === 0 || alto === 0) {
+             document.getElementById('precioFinalDisplay').innerText = "S/ 0.00";
+             return null;
+        }
+
+        const tipoVidrio = document.getElementById('tipoVidrio').value;
+        let precioUnitario = 0;
+        let esEstandar = false;
+
+        if (forma === 'rect' && ancho === 50 && alto === 50) {
+            if (tipoVidrio === '3mm') { precioUnitario = 30; esEstandar = true; }
+            else if (tipoVidrio === '4mm_chino_pulido') { precioUnitario = 50; esEstandar = true; }
+            else if (tipoVidrio === '4mm_chino_bisel') { precioUnitario = 65; esEstandar = true; }
+            else if (tipoVidrio === '4mm_opti_pulido') { precioUnitario = 70; esEstandar = true; }
+            else if (tipoVidrio === '4mm_opti_bisel') { precioUnitario = 75; esEstandar = true; }
+            else if (tipoVidrio === 'marco_madera') { precioUnitario = 35; esEstandar = true; }
+        }
+        else if (forma === 'circ' && ancho === 75) {
+             if (tipoVidrio.includes('chino') || tipoVidrio === '3mm') { precioUnitario = 150; esEstandar = true; }
+             if (tipoVidrio.includes('opti')) { precioUnitario = 250; esEstandar = true; }
+        }
+        
+        if (!esEstandar) {
+            let area = (forma === 'rect') ? (ancho * alto) / 10000 : (Math.PI * Math.pow(ancho/2, 2)) / 10000;
+            let tarifa = 0;
+            if (forma === 'rect') {
+                if (tipoVidrio === 'marco_madera') tarifa = 200;
+                else if (tipoVidrio === '3mm') tarifa = 120;
+                else if (tipoVidrio.includes('chino')) tarifa = 260;
+                else if (tipoVidrio.includes('opti')) tarifa = 300;
+            } else {
+                if (tipoVidrio.includes('chino') || tipoVidrio === '3mm') tarifa = 340;
+                else if (tipoVidrio.includes('opti')) tarifa = 570;
+            }
+            precioUnitario = area * tarifa;
+        }
+
+        const sistemaLed = document.getElementById('sistemaLed').value;
+        let precioLed = 0;
+        if (sistemaLed !== 'none') {
+            if (sistemaLed.includes('halo')) precioLed += 100;
+            if (sistemaLed.includes('arenado')) precioLed += 170;
+            if (sistemaLed.includes('_3')) precioLed += 70;
+        }
+
+        precioUnitario = Math.round((precioUnitario + precioLed) / 5) * 5;
+        let subtotalProductos = precioUnitario * cantidad;
+
+        const envio = parseFloat(document.getElementById('costoEnvio').value) || 0;
+        const instalacion = parseFloat(document.getElementById('costoInstalacion').value) || 0;
+        const descuento = parseFloat(document.getElementById('descuento').value) || 0;
+
+        let total = subtotalProductos + envio + instalacion - descuento;
+        document.getElementById('precioFinalDisplay').innerText = `S/ ${total.toFixed(2)}`;
+        
+        return { ancho, alto, forma, tipoVidrio, sistemaLed, cantidad, precioUnitario, subtotalProductos, envio, instalacion, descuento, total };
+    }
+
+    function generarBoleta() {
+        const datos = calcular();
+        if (!datos) { alert("Ingresa las medidas primero"); return; }
+
+        document.getElementById('bolCliente').innerText = document.getElementById('clienteNombre').value || "Cliente General";
+        document.getElementById('bolTelefono').innerText = document.getElementById('clienteTelefono').value || "--";
+        document.getElementById('bolDireccion').innerText = document.getElementById('clienteDireccion').value || "--";
+        document.getElementById('bolFecha').innerText = new Date().toLocaleDateString('es-PE');
+        
+        // LLENAR DATOS DE EMPRESA DESDE CONFIG
+        document.getElementById('bolEmpresa').innerText = document.getElementById('configEmpresa').value;
+        document.getElementById('bolCelulares').innerText = document.getElementById('configCelulares').value;
+        document.getElementById('bolCorreo').innerText = document.getElementById('configCorreo').value;
+
+        const rand = Math.floor(100000 + Math.random() * 900000);
+        document.getElementById('boletaCode').innerText = `B001-${rand}`;
+
+        const fechaInst = document.getElementById('fechaInstalacion').value;
+        const boxInst = document.getElementById('bolInstallBox');
+        if (fechaInst) {
+            const fechaObj = new Date(fechaInst);
+            const opciones = { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' };
+            document.getElementById('bolFechaInstalacion').innerText = fechaObj.toLocaleDateString('es-PE', opciones);
+            boxInst.style.display = 'block';
+        } else {
+            boxInst.style.display = 'none';
+        }
+
+        let desc = (datos.tipoVidrio.replace(/_/g, " ").toUpperCase());
+        desc += (datos.forma==='rect') ? ` (${datos.ancho}x${datos.alto}cm)` : ` (Ø${datos.ancho}cm)`;
+        
+        const ledNames = {
+            'halo_1': ' + LED Halo (1 Tono)',
+            'halo_3': ' + LED Halo (3 Tonos)',
+            'arenado_1': ' + LED Arenado (1 Tono)',
+            'arenado_3': ' + LED Arenado (3 Tonos)'
+        };
+        if(datos.sistemaLed !== 'none') desc += ledNames[datos.sistemaLed];
+
+        document.getElementById('bolTabla').innerHTML = `
+            <tr>
+                <td>${desc}</td>
+                <td class="text-center">${datos.cantidad}</td>
+                <td class="text-right">S/ ${datos.precioUnitario.toFixed(2)}</td>
+                <td class="text-right">S/ ${datos.subtotalProductos.toFixed(2)}</td>
+            </tr>
+        `;
+
+        document.getElementById('bolSubtotal').innerText = `S/ ${datos.subtotalProductos.toFixed(2)}`;
+        document.getElementById('bolEnvio').innerText = `S/ ${datos.envio.toFixed(2)}`;
+        document.getElementById('bolInstalacion').innerText = `S/ ${datos.instalacion.toFixed(2)}`;
+        document.getElementById('bolDescuento').innerText = `- S/ ${datos.descuento.toFixed(2)}`;
+        document.getElementById('bolTotalFinal').innerText = `S/ ${datos.total.toFixed(2)}`;
+
+        document.getElementById('calculatorView').classList.add('hidden');
+        document.getElementById('boletaContainer').style.display = 'block';
+    }
+
+    function volverCalculadora() {
+        document.getElementById('calculatorView').classList.remove('hidden');
+        document.getElementById('boletaContainer').style.display = 'none';
+    }
+
+    function resetForm() {
+        document.querySelectorAll('#calculatorView input:not([type="radio"]):not([type="range"]):not([id^="config"])').forEach(i => i.value = '');
+        document.getElementById('cantidad').value = '1';
+        document.querySelector('select').selectedIndex = 0;
+        calcular();
+    }
+
+    function descargarImagen() {
+        if (!window.html2canvas) { alert("Necesitas internet para esta función. Usa el botón 'Guardar PDF' si estás offline."); return; }
+        const boleta = document.getElementById("boletaView");
+        html2canvas(boleta, { scale: 2 }).then(canvas => {
+            const link = document.createElement("a");
+            link.download = `Boleta_${new Date().getTime()}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    }
+</script>
+</body>
+</html>
