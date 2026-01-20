@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cotizador Dazoru V12</title>
+    <title>Dazoru Projects v12.3</title>
     
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1A2935">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
@@ -24,344 +23,316 @@
             --silver: #B0BCC7;
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--bg-dark) 0%, #0f1720 100%);
-            color: var(--white);
-            margin: 0;
-            padding: 10px;
-            min-height: 100vh;
-        }
-
-        @media print {
-            body * { visibility: hidden; }
-            #boletaView, #boletaView * { visibility: visible; }
-            #boletaView { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; border: none; }
-            .container { display: none; }
-        }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg-dark); color: var(--white); margin: 0; padding: 10px; overflow-x: hidden; }
 
         .container {
             max-width: 500px; margin: 0 auto; background-color: var(--card-bg);
-            border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05); position: relative; 
+            border-radius: 20px; padding: 20px; position: relative; 
+            border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .settings-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; z-index: 10; }
+        .settings-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; z-index: 100; }
 
-        h1 { color: var(--gold); text-align: center; font-size: 20px; margin: 5px 0; text-transform: uppercase; }
-        .subtitle { text-align: center; color: var(--silver); font-size: 11px; margin-bottom: 15px; }
-        
-        label { font-size: 12px; color: var(--silver); display: block; margin-bottom: 5px; }
-        .input-group { margin-bottom: 12px; }
-        
+        h1 { color: var(--gold); text-align: center; font-size: 20px; margin: 5px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .subtitle { text-align: center; color: var(--silver); font-size: 11px; margin-bottom: 20px; }
+
+        /* PANEL CONFIGURACIÓN */
+        #configPanel { 
+            background: rgba(15, 23, 32, 0.98); padding: 25px; border-radius: 15px; 
+            margin-bottom: 20px; border: 1px solid var(--gold); display: none; 
+            position: absolute; width: 88%; left: 6%; top: 55px; z-index: 200;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+        }
+
+        .config-title { color: var(--gold); font-size: 13px; font-weight: bold; margin-bottom: 12px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        label { display: block; font-size: 11px; color: var(--silver); margin-bottom: 5px; margin-top: 10px; }
+
         input, select {
             width: 100%; background: var(--input-bg); border: 1px solid transparent; color: white;
             padding: 12px; border-radius: 10px; font-size: 14px; box-sizing: border-box; outline: none;
         }
-        input:focus, select:focus { border-color: var(--gold); }
 
-        .row { display: flex; gap: 10px; }
+        .row { display: flex; gap: 10px; margin-bottom: 12px; }
         .col { flex: 1; }
 
-        #configPanel { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed var(--gold); display: none; }
-        .config-section-title { color: var(--gold); font-weight: bold; margin-top: 10px; margin-bottom: 5px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #555; padding-bottom: 3px; }
-
-        .chip-group { display: flex; gap: 8px; background: var(--input-bg); padding: 5px; border-radius: 10px; flex-wrap: wrap; }
+        /* CHIPS */
+        .chip-group { display: flex; gap: 8px; background: var(--input-bg); padding: 5px; border-radius: 10px; margin-bottom: 15px; }
         .chip-input { display: none; }
-        .chip-label { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 11px; cursor: pointer; color: var(--silver); transition: 0.3s; min-width: 70px; }
+        .chip-label { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 11px; cursor: pointer; color: var(--silver); }
         .chip-input:checked + .chip-label { background: var(--gold); color: #1A2935; font-weight: bold; }
 
-        #biselOptions, #seguridadOption {
-            background: rgba(0,0,0,0.15); border-radius: 12px; padding: 10px; margin-bottom: 10px; border: 1px solid rgba(212, 175, 55, 0.3); display: none; 
-        }
+        .result-box { background: rgba(0,0,0,0.3); border: 1px solid var(--gold); border-radius: 15px; padding: 20px; text-align: center; margin-top: 20px; }
+        .total-price { font-size: 40px; color: var(--gold); font-weight: bold; margin: 0; }
 
-        .result-box { background: rgba(0,0,0,0.2); border: 1px solid var(--gold); border-radius: 15px; padding: 15px; text-align: center; margin-top: 15px; }
-        .total-price { font-size: 36px; color: var(--gold); font-weight: bold; margin: 0; }
-
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-gold { background: var(--gold); color: #1A2935; }
-        .btn-blue { background: #3498db; color: white; }
-        .btn-green { background: #27ae60; color: white; } 
+        .btn-green { background: #27ae60; color: white; }
         .btn-outline { background: transparent; border: 1px solid var(--silver); color: var(--silver); }
+
+        /* FIRMA PAUL GC */
+        .footer-credits {
+            text-align: center; font-size: 9px; color: rgba(255,255,255,0.25);
+            margin-top: 25px; letter-spacing: 1.5px; text-transform: uppercase;
+        }
 
         /* BOLETA */
         #boletaContainer { display: none; }
-        #boletaView { background: white; color: black; padding: 25px; position: relative; font-family: Arial, sans-serif; }
-        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; background-image: url('logo.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.1; pointer-events: none; z-index: 0; }
-        .boleta-header { display: flex; justify-content: space-between; margin-top: 20px; margin-bottom: 20px; z-index: 1; position: relative; }
-        .logo-area { width: 70px; height: 70px; border: 2px solid var(--gold); border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .logo-area img { width: 100%; height: 100%; object-fit: contain; }
-        .company-info { text-align: right; font-size: 11px; line-height: 1.4; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 15px 0; position: relative; z-index: 1; }
-        th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 8px; text-align: left; }
-        td { padding: 8px; border-bottom: 1px solid #eee; }
-        .final-total { font-weight: bold; font-size: 14px; border-top: 2px solid #000; padding-top: 5px; margin-top: 5px; display: flex; justify-content: space-between; }
+        #boletaView { background: white; color: black; padding: 40px 30px; position: relative; min-height: 520px; box-sizing: border-box; }
+        .watermark { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            width: 320px; height: 320px; background-size: contain; background-repeat: no-repeat; 
+            background-position: center; z-index: 0; pointer-events: none;
+        }
+        .boleta-header { display: flex; justify-content: space-between; align-items: center; z-index: 10; position: relative; margin-bottom: 30px; }
+        .logo-box { width: 85px; height: 85px; border-radius: 50%; overflow: hidden; border: 2px solid var(--gold); background: white; }
+        .logo-box img { width: 100%; height: 100%; object-fit: contain; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 25px 0; z-index: 10; position: relative; font-size: 12px; }
+        th { border-bottom: 2px solid #333; padding: 12px 8px; text-align: left; }
+        td { padding: 12px 8px; border-bottom: 1px solid #eee; }
+        .total-row { font-weight: bold; font-size: 18px; border-top: 2px solid #333; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div class="container" id="calculatorView">
+<div class="container" id="calcView">
     <button class="settings-btn" onclick="toggleConfig()">⚙️</button>
     <h1>Dazoru Projects</h1>
-    <p class="subtitle">El arte de transformar espacios | v12</p>
+    <p class="subtitle">el arte de transformar espacios | v12.3</p>
 
     <div id="configPanel">
-        <div class="config-section-title">🏢 DATOS DE EMPRESA</div>
-        <input type="text" id="configEmpresa" placeholder="Nombre Negocio" oninput="guardarConfig()">
-        <input type="text" id="configCelulares" placeholder="Celulares" oninput="guardarConfig()" style="margin-top:5px;">
-        <input type="text" id="configCorreo" placeholder="Correo" oninput="guardarConfig()" style="margin-top:5px;">
-    </div>
-
-    <div class="input-group">
-        <label>👤 Cliente</label>
-        <div class="row">
-            <input type="text" id="clienteNombre" placeholder="Nombre" class="col">
-            <input type="text" id="clienteTelefono" placeholder="Celular" class="col">
-        </div>
-    </div>
-
-    <div class="input-group">
-        <label>📏 Medidas (cm) y Forma</label>
-        <div class="chip-group" style="margin-bottom: 10px;">
-            <input type="radio" name="forma" id="rect" value="rect" class="chip-input" checked onchange="calcular()">
-            <label for="rect" class="chip-label">⬜ Rect</label>
-            <input type="radio" name="forma" id="circ" value="circ" class="chip-input" onchange="calcular()">
-            <label for="circ" class="chip-label">⚪ Circ</label>
-        </div>
-        <div class="row">
-            <input type="number" id="ancho" placeholder="Ancho" class="col" oninput="calcular()">
-            <input type="number" id="alto" placeholder="Alto" class="col" id="colAlto" oninput="calcular()">
-        </div>
-    </div>
-
-    <div class="input-group">
-        <label>💎 Material y Acabado</label>
-        <select id="tipoVidrio" onchange="calcular()" style="margin-bottom:8px;">
-            <option value="espejo_3mm">Espejo de 3 mm</option>
-            <option value="espejo_4mm">Espejo de 4 mm</option>
-            <option value="espejo_opti">Espejo 4 mm Optimirror</option>
-            <option value="espejo_marco">Espejo con Marco Decorativo</option>
-        </select>
+        <div class="config-title">🖼️ DISEÑO DE BOLETA</div>
+        <label>Cargar Logo (.png / .jpg):</label>
+        <input type="file" id="logoInput" accept="image/*" onchange="handleLogo(event)">
+        <label>Transparencia de Logo:</label>
+        <input type="range" id="opacidadInput" min="0" max="0.4" step="0.05" value="0.1" oninput="updateOpacity(this.value)">
         
+        <div class="config-title" style="margin-top:20px;">🏢 DATOS DEL NEGOCIO</div>
+        <input type="text" id="confNombre" placeholder="Dazoru Projects" oninput="saveConf()">
+        <input type="text" id="confTelf" placeholder="930 132 709 / 958 786 703" oninput="saveConf()">
+        <button class="btn btn-gold" onclick="toggleConfig()">Guardar y Cerrar</button>
+    </div>
+
+    <div class="row">
+        <input type="text" id="cliente" placeholder="Nombre Cliente" class="col">
+        <input type="text" id="celular" placeholder="WhatsApp" class="col">
+    </div>
+
+    <div class="chip-group">
+        <input type="radio" name="forma" id="rect" value="rect" class="chip-input" checked onchange="calc()">
+        <label for="rect" class="chip-label">Cuadrado/Rect</label>
+        <input type="radio" name="forma" id="circ" value="circ" class="chip-input" onchange="calc()">
+        <label for="circ" class="chip-label">Circular</label>
+    </div>
+
+    <div class="row">
+        <div class="col"><label>Ancho (cm)</label><input type="number" id="ancho" placeholder="0" oninput="calc()"></div>
+        <div class="col" id="colAlto"><label>Alto (cm)</label><input type="number" id="alto" placeholder="0" oninput="calc()"></div>
+    </div>
+
+    <label>Material:</label>
+    <select id="material" onchange="calc()">
+        <option value="3mm_marco">Espejo de 3 mm con Marco</option>
+        <option value="3mm">Espejo de 3 mm (Solo Vidrio)</option>
+        <option value="4mm">Espejo de 4 mm</option>
+        <option value="opti">Espejo 4 mm Optimirror</option>
+    </select>
+
+    <div id="finishGroup">
+        <label>Acabado:</label>
         <div class="chip-group">
-            <input type="radio" name="acabado" id="pulido" value="pulido" class="chip-input" checked onchange="calcular()">
-            <label for="pulido" class="chip-label">✨ Pulido</label>
-            <input type="radio" name="acabado" id="bisel" value="bisel" class="chip-input" onchange="calcular()">
-            <label for="bisel" class="chip-label">💎 Biselado</label>
-            <input type="radio" name="acabado" id="crudo" value="crudo" class="chip-input" onchange="calcular()">
-            <label for="crudo" class="chip-label">🔪 Crudo</label>
+            <input type="radio" name="acabado" id="pul" value="pul" class="chip-input" checked onchange="calc()">
+            <label for="pul" class="chip-label">Pulido ✨</label>
+            <input type="radio" name="acabado" id="bis1" value="bis1" class="chip-input" onchange="calc()">
+            <label for="bis1" class="chip-label">Bisel 1cm</label>
+            <input type="radio" name="acabado" id="bis2" value="bis2" class="chip-input" onchange="calc()">
+            <label for="bis2" class="chip-label">Bisel 2cm</label>
         </div>
     </div>
 
-    <div id="biselOptions">
-        <label style="color:var(--gold); font-size:10px;">TAMAÑO DEL BISEL:</label>
-        <div class="chip-group">
-            <input type="radio" name="biselSize" id="b1" value="1cm" class="chip-input" checked onchange="calcular()">
-            <label for="b1" class="chip-label">1 cm</label>
-            <input type="radio" name="biselSize" id="b2" value="2cm" class="chip-input" onchange="calcular()">
-            <label for="b2" class="chip-label">2 cm</label>
-        </div>
-    </div>
-
-    <div class="input-group">
-        <label>🎨 Diseño y Luz</label>
-        <div class="row" style="margin-bottom:8px;">
-            <select id="soloArenado" class="col" onchange="calcular()">
+    <div class="row">
+        <div class="col">
+            <label>Arenado:</label>
+            <select id="arenado" onchange="calc()">
                 <option value="no">Sin Arenado</option>
-                <option value="si">Solo Arenado (Diseño)</option>
-            </select>
-            <select id="sistemaLed" class="col" onchange="calcular()">
-                <option value="none">Sin Luz LED</option>
-                <option value="halo_1">Halo (1 Tono)</option>
-                <option value="halo_3">Halo (3 Tonos)</option>
-                <option value="arenado_1">Arenada (1 Tono)</option>
-                <option value="arenado_3">Arenada (3 Tonos)</option>
+                <option value="si">Con Arenado</option>
             </select>
         </div>
-        <div id="seguridadOption">
-             <input type="checkbox" id="laminaSeguridad" onchange="calcular()"> <label style="display:inline; color:white;">Añadir Lámina de Seguridad (+S/ 25 m²)</label>
+        <div class="col">
+            <label>LED:</label>
+            <select id="led" onchange="calc()">
+                <option value="no">Sin Luz</option>
+                <option value="1">1 Tono</option>
+                <option value="3">3 Tonos</option>
+            </select>
         </div>
     </div>
 
-    <div class="row input-group">
-        <div class="col"><label>🚚 Envío</label><input type="number" id="costoEnvio" placeholder="0" oninput="calcular()"></div>
-        <div class="col"><label>🛠️ Instal.</label><input type="number" id="costoInstalacion" placeholder="0" oninput="calcular()"></div>
-        <div class="col" style="flex:0.5;"><label>🔢 Cant.</label><input type="number" id="cantidad" value="1" oninput="calcular()"></div>
+    <div class="row" style="background: rgba(212,175,55,0.08); padding: 12px; border-radius: 12px; align-items: center;">
+        <input type="checkbox" id="seguridad" onchange="calc()" style="width:18px; margin-right:10px;">
+        <label style="margin:0; color:white; font-size:12px;">Lámina de Seguridad (+S/ 25 m²)</label>
     </div>
 
     <div class="result-box">
-        <div style="font-size: 10px; color: var(--silver);">TOTAL ESTIMADO</div>
-        <div class="total-price" id="precioFinalDisplay">S/ 0.00</div>
+        <div class="total-price" id="totalDisp">S/ 0.00</div>
     </div>
 
-    <button class="btn btn-gold" onclick="generarBoleta()">Generar Boleta 📄</button>
-    <button class="btn btn-outline" onclick="location.reload()">Limpiar 🔄</button>
+    <button class="btn btn-gold" onclick="showBoleta()">Generar Cotización 📄</button>
+    <button class="btn btn-outline" onclick="location.reload()">Nuevo 🔄</button>
+
+    <div class="footer-credits">
+        © 2026 | Systems & Optimization by <b>Paul GC</b>
+    </div>
 </div>
 
 <div class="container" id="boletaContainer">
-    <button class="btn btn-outline" onclick="volverCalculadora()">⬅️ Editar Datos</button>
     <div id="boletaView">
-        <div class="watermark"></div>
+        <div class="watermark" id="bolWatermark"></div>
         <div class="boleta-header">
-            <div class="logo-area"><img src="logo.png" alt="Logo"></div>
-            <div class="company-info">
-                <h2 style="margin:0; color:var(--gold);">Cotización</h2>
-                <strong id="bolEmpresa">Dazoru Projects</strong><br>
-                Cel: <span id="bolCelulares">---</span>
+            <div class="logo-box"><img id="bolLogo" src="logo.png"></div>
+            <div style="text-align:right;">
+                <h2 style="margin:0; color:var(--gold); font-size:22px;">COTIZACIÓN</h2>
+                <b id="resEmpresa">Dazoru Projects</b><br>
+                <span id="resTelf" style="font-size:11px;"></span>
             </div>
         </div>
-        <div style="font-size:11px; margin-bottom:10px;">
-            <strong>Cliente:</strong> <span id="bolCliente">---</span><br>
-            <strong>Fecha:</strong> <span id="bolFecha">---</span>
-        </div>
+        
+        <p style="font-size:12px; border-bottom:1px solid #eee; padding-bottom:12px;">
+            <b>Cliente:</b> <span id="resCliente"></span><br>
+            <b>Fecha:</b> <span id="resFecha"></span>
+        </p>
+
         <table>
             <thead><tr><th>Descripción</th><th style="text-align:right">Total</th></tr></thead>
-            <tbody id="bolTabla"></tbody>
+            <tbody id="tablaItems"></tbody>
+            <tfoot><tr class="total-row"><td>TOTAL</td><td style="text-align:right" id="resTotal"></td></tr></tfoot>
         </table>
-        <div class="final-total"><span>TOTAL A PAGAR:</span><span id="bolTotalFinal">S/ 0.00</span></div>
-        <p style="font-size:9px; color:#666; margin-top:20px; text-align:center;">Hacemos de tus espacios un reflejo de ti.</p>
+        <p style="text-align:center; font-size:11px; color:#666; font-style:italic;">"el arte de transformar espacios"</p>
     </div>
-    <button class="btn btn-green" onclick="enviarWhatsApp()">Enviar por WhatsApp 💬</button>
-    <button class="btn btn-blue" onclick="window.print()">Guardar como PDF 📥</button>
+    <button class="btn btn-green" onclick="enviarWhatsApp()">Enviar WhatsApp 💬</button>
+    <button class="btn btn-gold" onclick="window.print()">Imprimir PDF 📥</button>
+    <button class="btn btn-outline" onclick="location.reload()">Volver 🔄</button>
+    
+    <div class="footer-credits" style="color:#aaa;">
+        © 2026 | Systems & Optimization by <b>Paul GC</b>
+    </div>
 </div>
 
 <script>
-    // 1. CARGA INICIAL
-    window.onload = function() {
-        document.getElementById('configEmpresa').value = localStorage.getItem('empresa') || "Dazoru Projects";
-        document.getElementById('configCelulares').value = localStorage.getItem('celulares') || "930 132 709 / 958 786 703";
-        document.getElementById('configCorreo').value = localStorage.getItem('correo') || "dazoruprojects@gmail.com";
+    window.onload = () => {
+        document.getElementById('confNombre').value = localStorage.getItem('d_nom') || "Dazoru Projects";
+        document.getElementById('confTelf').value = localStorage.getItem('d_tel') || "930 132 709 / 958 786 703";
+        const savedLogo = localStorage.getItem('d_logo');
+        if(savedLogo) {
+            document.getElementById('bolLogo').src = savedLogo;
+            document.getElementById('bolWatermark').style.backgroundImage = `url(${savedLogo})`;
+        }
+        updateOpacity(localStorage.getItem('d_op') || 0.1);
     };
 
-    function guardarConfig() {
-        localStorage.setItem('empresa', document.getElementById('configEmpresa').value);
-        localStorage.setItem('celulares', document.getElementById('configCelulares').value);
-        localStorage.setItem('correo', document.getElementById('configCorreo').value);
+    function saveConf() {
+        localStorage.setItem('d_nom', document.getElementById('confNombre').value);
+        localStorage.setItem('d_tel', document.getElementById('confTelf').value);
+    }
+
+    function handleLogo(e) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64 = reader.result;
+            localStorage.setItem('d_logo', base64);
+            document.getElementById('bolLogo').src = base64;
+            document.getElementById('bolWatermark').style.backgroundImage = `url(${base64})`;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    }
+
+    function updateOpacity(val) {
+        document.getElementById('bolWatermark').style.opacity = val;
+        localStorage.setItem('d_op', val);
+        document.getElementById('opacidadInput').value = val;
     }
 
     function toggleConfig() {
         const p = document.getElementById('configPanel');
-        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
-    // 2. LÓGICA DE CÁLCULO V12
-    function calcular() {
+    function calc() {
+        const mat = document.getElementById('material').value;
         const forma = document.querySelector('input[name="forma"]:checked').value;
         const ancho = parseFloat(document.getElementById('ancho').value) || 0;
-        let alto = parseFloat(document.getElementById('alto').value) || 0;
-        const cantidad = parseFloat(document.getElementById('cantidad').value) || 1;
-        const tipoVidrio = document.getElementById('tipoVidrio').value;
-        const acabado = document.querySelector('input[name="acabado"]:checked').value;
-
-        // UI Helpers
-        document.getElementById('alto').style.display = (forma === 'circ') ? 'none' : 'block';
-        if(forma === 'circ') alto = ancho;
-        document.getElementById('biselOptions').style.display = (acabado === 'bisel') ? 'block' : 'none';
-        document.getElementById('seguridadOption').style.display = 'block';
-
-        if (ancho === 0 || alto === 0) return;
-
-        let area = (forma === 'rect') ? (ancho * alto) / 10000 : (Math.PI * Math.pow(ancho/2, 2)) / 10000;
-        let perimetro = (forma === 'rect') ? (ancho * 2 + alto * 2) / 100 : (Math.PI * ancho) / 100;
+        let alto = (forma === 'circ') ? ancho : (parseFloat(document.getElementById('alto').value) || 0);
         
-        let precioUnitario = 0;
+        document.getElementById('colAlto').style.visibility = (forma === 'circ') ? 'hidden' : 'visible';
+        document.getElementById('finishGroup').style.display = (mat === '3mm_marco') ? 'none' : 'block';
 
-        // A. LÓGICA DE PRECIOS ESTÁNDAR (3mm + Marco)
-        if (tipoVidrio === 'espejo_marco' && ancho <= 50 && alto <= 50 && forma === 'rect') {
-            const tablaMarcos = {30:25, 35:28, 40:30, 45:33, 50:35};
-            const mayor = Math.max(ancho, alto);
-            precioUnitario = tablaMarcos[mayor] || 35;
+        if(ancho === 0 || alto === 0) return 0;
+
+        let area = (ancho * alto) / 10000;
+        let perimetro = (forma === 'rect') ? (ancho * 2 + alto * 2) / 100 : (Math.PI * ancho) / 100;
+        let precio = 0;
+
+        // PRECIOS ESTÁNDAR
+        if(mat === '3mm_marco' && ancho <= 50 && alto <= 50 && forma === 'rect') {
+            const tabla = {30:25, 35:28, 40:30, 45:33, 50:35};
+            precio = tabla[Math.max(ancho, alto)] || 35;
         } 
-        // B. LÓGICA DE PRECIOS ESTÁNDAR (4mm y Opti Pulido)
-        else if (ancho === 50 && alto === 50 && acabado === 'pulido') {
-            if(tipoVidrio === 'espejo_4mm') precioUnitario = 40;
-            else if(tipoVidrio === 'espejo_opti') precioUnitario = 82;
-            else if(tipoVidrio === 'espejo_3mm') precioUnitario = 30;
+        else if (mat === '4mm' && ancho === 50 && alto === 50 && forma === 'rect') {
+            precio = 40;
         }
-        // C. LÓGICA DE ESCALADO AUTOMÁTICO
+        else if (mat === 'opti' && ancho === 50 && alto === 50 && forma === 'rect') {
+            precio = 82;
+        }
+        // ESCALADO
         else {
-            let tarifaMaterial = 120; // 4mm base
-            if(tipoVidrio === 'espejo_3mm' || tipoVidrio === 'espejo_marco') tarifaMaterial = 100;
-            if(tipoVidrio === 'espejo_opti') tarifaMaterial = 288;
-            if(forma === 'circ') tarifaMaterial *= 1.30; // Desperdicio círculo
+            let m2 = 120;
+            if(mat.includes('3mm')) m2 = 100;
+            if(mat === 'opti') m2 = 288;
+            if(forma === 'circ') m2 *= 1.30;
 
-            precioUnitario = area * tarifaMaterial;
+            precio = area * m2;
 
-            // Mano de obra (Bordes)
-            if (tipoVidrio === 'espejo_marco') {
-                precioUnitario += (perimetro * 10); // Varilla a S/10 ml
-            } else if (acabado === 'pulido') {
-                precioUnitario += (perimetro * 5);
-            } else if (acabado === 'bisel') {
-                const bSize = document.querySelector('input[name="biselSize"]:checked').value;
-                precioUnitario += (perimetro * 5); // Pulido base
-                let extraBisel = (bSize === '1cm') ? Math.max(25, perimetro * 12.5) : Math.max(45, perimetro * 22.5);
-                precioUnitario += extraBisel;
+            if(mat === '3mm_marco') {
+                precio += (perimetro * 10);
+            } else {
+                const aca = document.querySelector('input[name="acabado"]:checked').value;
+                if(aca === 'pul') precio += (perimetro * 5);
+                if(aca === 'bis1') precio += Math.max(25, perimetro * 12.5);
+                if(aca === 'bis2') precio += Math.max(45, perimetro * 22.5);
             }
         }
 
-        // Arenado Solo
-        if(document.getElementById('soloArenado').value === 'si') {
-            precioUnitario += Math.max(55, area * 140);
-        }
+        if(document.getElementById('arenado').value === 'si') precio += Math.max(55, area * 140);
+        const l = document.getElementById('led').value;
+        if(l !== 'no') precio += (l === '1' ? 170 : 240);
+        if(document.getElementById('seguridad').checked) precio += (area * 25);
 
-        // Kits LED
-        const kit = document.getElementById('sistemaLed').value;
-        if(kit !== 'none') {
-            precioUnitario += (kit.includes('_3')) ? 240 : 170;
-        }
-
-        // Lámina Seguridad
-        if(document.getElementById('laminaSeguridad').checked) {
-            precioUnitario += (area * 25);
-        }
-
-        // Redondeo Final
-        precioUnitario = Math.ceil(precioUnitario / 5) * 5;
-        
-        const subtotal = precioUnitario * cantidad;
-        const envio = parseFloat(document.getElementById('costoEnvio').value) || 0;
-        const inst = parseFloat(document.getElementById('costoInstalacion').value) || 0;
-        const total = subtotal + envio + inst;
-
-        document.getElementById('precioFinalDisplay').innerText = `S/ ${total.toFixed(2)}`;
-        return { total, subtotal, precioUnitario, tipoVidrio, acabado, forma, ancho, alto, cantidad, envio, inst };
+        precio = Math.ceil(precio / 5) * 5;
+        document.getElementById('totalDisp').innerText = `S/ ${precio.toFixed(2)}`;
+        return precio;
     }
 
-    function generarBoleta() {
-        const d = calcular();
-        if(!d) return alert("Ingresa medidas");
-        
-        document.getElementById('bolEmpresa').innerText = localStorage.getItem('empresa');
-        document.getElementById('bolCelulares').innerText = localStorage.getItem('celulares');
-        document.getElementById('bolCliente').innerText = document.getElementById('clienteNombre').value || "Cliente General";
-        document.getElementById('bolFecha').innerText = new Date().toLocaleDateString();
-
-        let desc = d.tipoVidrio.replace("espejo_", "ESPEJO DE ").toUpperCase();
-        desc += ` ${d.acabado.toUpperCase()} (${d.ancho}x${d.alto}cm)`;
-        
-        document.getElementById('bolTabla').innerHTML = `
-            <tr><td>${desc} x${d.cantidad}</td><td style="text-align:right">S/ ${d.subtotal.toFixed(2)}</td></tr>
-            ${d.envio > 0 ? `<tr><td>Envío</td><td style="text-align:right">S/ ${d.envio.toFixed(2)}</td></tr>` : ''}
-            ${d.inst > 0 ? `<tr><td>Instalación</td><td style="text-align:right">S/ ${d.inst.toFixed(2)}</td></tr>` : ''}
-        `;
-        document.getElementById('bolTotalFinal').innerText = `S/ ${d.total.toFixed(2)}`;
-
-        document.getElementById('calculatorView').classList.add('hidden');
+    function showBoleta() {
+        const p = calc();
+        if(!p) return alert("Ingresa medidas");
+        document.getElementById('resEmpresa').innerText = localStorage.getItem('d_nom');
+        document.getElementById('resTelf').innerText = localStorage.getItem('d_tel');
+        document.getElementById('resCliente').innerText = document.getElementById('cliente').value || "Cliente General";
+        document.getElementById('resFecha').innerText = new Date().toLocaleDateString();
+        let desc = document.getElementById('material').options[document.getElementById('material').selectedIndex].text.toUpperCase();
+        desc += ` (${document.getElementById('ancho').value}x${document.getElementById('alto').value}cm)`;
+        document.getElementById('tablaItems').innerHTML = `<tr><td>${desc}</td><td style="text-align:right">S/ ${p.toFixed(2)}</td></tr>`;
+        document.getElementById('resTotal').innerText = `S/ ${p.toFixed(2)}`;
+        document.getElementById('calcView').classList.add('hidden');
         document.getElementById('boletaContainer').style.display = 'block';
     }
 
-    function volverCalculadora() {
-        document.getElementById('calculatorView').classList.remove('hidden');
-        document.getElementById('boletaContainer').style.display = 'none';
-    }
-
     function enviarWhatsApp() {
-        const d = calcular();
-        const msg = `*DAZORU PROJECTS*%0AHola, aquí tu cotización:%0A--------------------------%0A*Producto:* Espejo ${d.ancho}x${d.alto}cm%0A*Total:* S/ ${d.total.toFixed(2)}%0A--------------------------%0A_El arte de transformar espacios_`;
-        const tel = document.getElementById('clienteTelefono').value;
-        window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
+        const p = calc();
+        const msg = `*DAZORU PROJECTS*%0A_Cotización de Espejo_%0A--------------------------%0A*Medida:* ${document.getElementById('ancho').value}x${document.getElementById('alto').value}cm%0A*Total:* S/ ${p.toFixed(2)}%0A--------------------------%0A_Powered by Paul GC_`;
+        const tel = document.getElementById('celular').value;
+        window.open(`https://wa.me/51${tel}?text=${msg}`, '_blank');
     }
 </script>
 </body>
