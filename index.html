@@ -31,7 +31,6 @@
             min-height: 100vh;
         }
 
-        /* AJUSTES PARA IMPRESIÓN (PDF) */
         @media print {
             body * { visibility: hidden; }
             #boletaView, #boletaView * { visibility: visible; }
@@ -39,7 +38,6 @@
             .container { display: none; }
         }
 
-        /* --- APP CONTAINER --- */
         .container {
             max-width: 500px; margin: 0 auto; background-color: var(--card-bg);
             border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
@@ -63,16 +61,24 @@
         .row { display: flex; gap: 10px; }
         .col { flex: 1; }
 
-        /* PANEL CONFIGURACIÓN */
         #configPanel { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px dashed var(--gold); display: none; }
         .config-section-title { color: var(--gold); font-weight: bold; margin-top: 10px; margin-bottom: 5px; font-size: 13px; text-transform: uppercase; border-bottom: 1px solid #555; padding-bottom: 3px; }
         input[type="range"] { width: 100%; margin: 10px 0; accent-color: var(--gold); }
 
-        /* CHIPS SELECTORES */
-        .chip-group { display: flex; gap: 10px; background: var(--input-bg); padding: 5px; border-radius: 10px; }
+        .chip-group { display: flex; gap: 10px; background: var(--input-bg); padding: 5px; border-radius: 10px; flex-wrap: wrap; }
         .chip-input { display: none; }
-        .chip-label { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 12px; cursor: pointer; color: var(--silver); transition: 0.3s; }
+        .chip-label { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 12px; cursor: pointer; color: var(--silver); transition: 0.3s; min-width: 80px; }
         .chip-input:checked + .chip-label { background: var(--gold); color: #1A2935; font-weight: bold; }
+
+        /* Estilo para opción de Bisel */
+        #biselOptions {
+            background: rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--gold);
+            display: none; 
+        }
 
         .result-box {
             background: rgba(0,0,0,0.2); border: 1px solid var(--gold); border-radius: 15px;
@@ -86,7 +92,6 @@
         .btn-green { background: #27ae60; color: white; } 
         .btn-outline { background: transparent; border: 1px solid var(--silver); color: var(--silver); }
 
-        /* --- BOLETA --- */
         #boletaContainer { display: none; }
         #boletaView {
             background: white; color: black; padding: 25px; 
@@ -144,7 +149,7 @@
 <div class="container" id="calculatorView">
     <button class="settings-btn" onclick="toggleConfig()">⚙️</button>
     
-    <h1 id="appTitle">Cotizador Vidrios</h1> <p class="subtitle">Sistema Universal v11</p>
+    <h1 id="appTitle">Cotizador Vidrios</h1> <p class="subtitle">Sistema Universal v12</p>
 
     <div id="configPanel">
         <div class="config-section-title">🏢 DATOS DE TU EMPRESA</div>
@@ -188,7 +193,7 @@
     </div>
 
     <div class="input-group">
-        <label>💎 Material y Cantidad</label>
+        <label>💎 Material</label>
         <select id="tipoVidrio" onchange="calcular()" style="margin-bottom:8px;">
             <option value="marco_madera">Espejo con Marco de Madera</option>
             <option value="3mm">Espejo 3mm Económico</option>
@@ -198,6 +203,16 @@
             <option value="4mm_opti_bisel">Espejo 4mm Optimirror BISELADO</option>
         </select>
         
+        <div id="biselOptions">
+            <label style="color:var(--gold); font-weight:bold; margin-bottom:8px; display:block;">📏 Tamaño del Bisel:</label>
+            <div class="chip-group">
+                <input type="radio" name="biselSize" id="b1" value="1cm" class="chip-input" checked onchange="calcular()">
+                <label for="b1" class="chip-label">1 cm</label>
+                <input type="radio" name="biselSize" id="b2" value="2cm" class="chip-input" onchange="calcular()">
+                <label for="b2" class="chip-label">2 cm</label>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col">
                 <select id="sistemaLed" onchange="calcular()">
@@ -302,7 +317,6 @@
 </div>
 
 <script>
-    // 1. CARGA INICIAL: RECUPERAR DATOS GUARDADOS
     window.onload = function() {
         if(localStorage.getItem('empresa')) document.getElementById('configEmpresa').value = localStorage.getItem('empresa');
         else document.getElementById('configEmpresa').value = "Dazoru Projects"; 
@@ -318,7 +332,6 @@
         const empresa = document.getElementById('configEmpresa').value;
         const celulares = document.getElementById('configCelulares').value;
         const correo = document.getElementById('configCorreo').value;
-
         localStorage.setItem('empresa', empresa);
         localStorage.setItem('celulares', celulares);
         localStorage.setItem('correo', correo);
@@ -347,12 +360,21 @@
         document.getElementById('watermark').style.opacity = document.getElementById('opacityRange').value;
     }
 
-    // 2. LÓGICA DE CÁLCULO
+    // 2. LÓGICA DE CÁLCULO ACTUALIZADA
     function calcular() {
         const forma = document.querySelector('input[name="forma"]:checked').value;
         const ancho = parseFloat(document.getElementById('ancho').value) || 0;
         let alto = parseFloat(document.getElementById('alto').value) || 0;
         const cantidad = parseFloat(document.getElementById('cantidad').value) || 1;
+        const tipoVidrio = document.getElementById('tipoVidrio').value;
+
+        // Detector de Bisel
+        const biselDiv = document.getElementById('biselOptions');
+        if (tipoVidrio.includes('bisel')) {
+            biselDiv.style.display = 'block';
+        } else {
+            biselDiv.style.display = 'none';
+        }
 
         if (forma === 'circ') {
             document.getElementById('colAlto').style.display = 'none';
@@ -366,17 +388,18 @@
              return null;
         }
 
-        const tipoVidrio = document.getElementById('tipoVidrio').value;
         let precioUnitario = 0;
         let esEstandar = false;
 
+        // PRECIOS BASE 4MM ACTUALIZADOS
         if (forma === 'rect' && ancho === 50 && alto === 50) {
-            if (tipoVidrio === '3mm') { precioUnitario = 30; esEstandar = true; }
-            else if (tipoVidrio === '4mm_chino_pulido') { precioUnitario = 50; esEstandar = true; }
-            else if (tipoVidrio === '4mm_chino_bisel') { precioUnitario = 65; esEstandar = true; }
-            else if (tipoVidrio === '4mm_opti_pulido') { precioUnitario = 70; esEstandar = true; }
-            else if (tipoVidrio === '4mm_opti_bisel') { precioUnitario = 75; esEstandar = true; }
-            else if (tipoVidrio === 'marco_madera') { precioUnitario = 35; esEstandar = true; }
+            esEstandar = true;
+            if (tipoVidrio === '3mm') precioUnitario = 30;
+            else if (tipoVidrio === '4mm_chino_pulido') precioUnitario = 40; // PRECIO NUEVO
+            else if (tipoVidrio === '4mm_chino_bisel') precioUnitario = 40; 
+            else if (tipoVidrio === '4mm_opti_pulido') precioUnitario = 82; // PRECIO NUEVO
+            else if (tipoVidrio === '4mm_opti_bisel') precioUnitario = 82;
+            else if (tipoVidrio === 'marco_madera') precioUnitario = 35;
         }
         else if (forma === 'circ' && ancho === 75) {
              if (tipoVidrio.includes('chino') || tipoVidrio === '3mm') { precioUnitario = 150; esEstandar = true; }
@@ -398,6 +421,22 @@
             precioUnitario = area * tarifa;
         }
 
+        // --- LÓGICA DE METRO LINEAL PARA BISELADO ---
+        let biselLabel = '';
+        if (tipoVidrio.includes('bisel')) {
+            const perimetro = (forma === 'rect') ? (ancho * 2 + alto * 2) / 100 : (Math.PI * ancho) / 100;
+            const biselSize = document.querySelector('input[name="biselSize"]:checked').value;
+            biselLabel = biselSize;
+
+            let costoBisel = 0;
+            if (biselSize === '1cm') {
+                costoBisel = Math.max(25, perimetro * 12); // Tarifa 12/ml | Min S/25
+            } else {
+                costoBisel = Math.max(45, perimetro * 18); // Tarifa 18/ml | Min S/45
+            }
+            precioUnitario += costoBisel;
+        }
+
         const sistemaLed = document.getElementById('sistemaLed').value;
         let precioLed = 0;
         if (sistemaLed !== 'none') {
@@ -416,10 +455,9 @@
         let total = subtotalProductos + envio + instalacion - descuento;
         document.getElementById('precioFinalDisplay').innerText = `S/ ${total.toFixed(2)}`;
         
-        return { ancho, alto, forma, tipoVidrio, sistemaLed, cantidad, precioUnitario, subtotalProductos, envio, instalacion, descuento, total };
+        return { ancho, alto, forma, tipoVidrio, sistemaLed, biselLabel, cantidad, precioUnitario, subtotalProductos, envio, instalacion, descuento, total };
     }
 
-    // 3. GENERAR BOLETA FINAL
     function generarBoleta() {
         const datos = calcular();
         if (!datos) { alert("Ingresa las medidas primero"); return; }
@@ -429,7 +467,6 @@
         document.getElementById('bolDireccion').innerText = document.getElementById('clienteDireccion').value || "--";
         document.getElementById('bolFecha').innerText = new Date().toLocaleDateString('es-PE');
         
-        // INYECTAR DATOS CONFIGURADOS
         document.getElementById('bolEmpresa').innerText = document.getElementById('configEmpresa').value;
         document.getElementById('bolCelulares').innerText = document.getElementById('configCelulares').value;
         document.getElementById('bolCorreo').innerText = document.getElementById('configCorreo').value;
@@ -449,6 +486,9 @@
         }
 
         let desc = (datos.tipoVidrio.replace(/_/g, " ").toUpperCase());
+        if (datos.tipoVidrio.includes('bisel')) {
+            desc += ` (Bisel ${datos.biselLabel})`;
+        }
         desc += (datos.forma==='rect') ? ` (${datos.ancho}x${datos.alto}cm)` : ` (Ø${datos.ancho}cm)`;
         
         const ledNames = {
@@ -487,6 +527,7 @@
         document.querySelectorAll('#calculatorView input:not([type="radio"]):not([type="range"]):not([id^="config"])').forEach(i => i.value = '');
         document.getElementById('cantidad').value = '1';
         document.querySelector('select').selectedIndex = 0;
+        document.getElementById('biselOptions').style.display = 'none';
         calcular();
     }
 
