@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dazoru Projects v13.3</title>
+    <title>Dazoru Projects v13.9</title>
     
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1A2935">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&family=Great+Vibes&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
@@ -58,22 +58,59 @@
         #boletaContainer { display: none; }
         #boletaView { background: white; color: black; padding: 40px 30px; position: relative; min-height: 600px; box-sizing: border-box; }
         
+        /* ESTILO PARA EL NOMBRE DE LA EMPRESA (Tipo Script) */
+        #resEmpresa {
+            font-family: 'Great Vibes', cursive; /* Fuente Script */
+            color: var(--gold);
+            font-size: 32px !important; /* Tamaño grande */
+            font-weight: normal; 
+            line-height: 1.1;
+            display: block;
+            margin-top: 15px; /* <--- AJUSTE: Empuja el nombre hacia abajo */
+            margin-bottom: 5px;
+            text-shadow: 0px 0px 1px rgba(0,0,0,0.1);
+        }
+
+        /* --- AJUSTES CELULAR v13.9 --- */
         @media only screen and (max-width: 480px) {
-            #boletaView { padding: 20px 15px; } 
-            .bol-info h2 { font-size: 16px !important; margin-bottom: 2px !important; }
-            .bol-info p, .bol-info b { font-size: 10px !important; }
-            .logo-box { width: 60px !important; height: 60px !important; }
+            #boletaView { padding: 15px 12px; } 
+            
+            .boleta-header { 
+                margin-top: 25px; 
+                margin-bottom: 10px; 
+                align-items: center; 
+            }
+            
+            .boleta-top-code { 
+                font-size: 10px !important; 
+                top: 10px !important; 
+                right: 15px !important; 
+            }
+
+            .logo-box { width: 55px !important; height: 55px !important; flex-shrink: 0; margin-right: 8px; }
+            
+            /* Nombre Script en Celular con margen superior */
+            #resEmpresa { font-size: 28px !important; margin-top: 10px !important; margin-bottom: 2px; }
+
+            .bol-info { font-size: 10.5px !important; line-height: 1.25 !important; width: 100%; }
+            .bol-info h2 { font-size: 16px !important; margin-bottom: 0px !important; }
+            
             .client-section { font-size: 10px !important; margin-bottom: 10px !important; }
-            .install-banner { font-size: 10px !important; padding: 8px !important; margin: 10px 0 !important; }
-            table { font-size: 10px !important; margin: 15px 0 !important; }
-            th, td { padding: 6px 4px !important; }
-            .summary-total { font-size: 14px !important; }
-            .terms { font-size: 8px !important; padding-top: 15px !important; }
-            .boleta-top-code { font-size: 10px !important; top: 15px !important; right: 15px !important; }
+            .client-section h3 { font-size: 10px !important; border-bottom: 1px solid #ccc; margin-bottom: 4px; }
+            .install-banner { font-size: 10px !important; padding: 6px !important; margin: 10px 0 !important; }
+            
+            table { font-size: 10px !important; margin: 10px 0 !important; }
+            th, td { padding: 5px 3px !important; }
+            
+            .summary-section { width: 75% !important; font-size: 10px !important; }
+            .summary-total { font-size: 14px !important; padding-top: 5px !important; }
+            
+            .terms { font-size: 8px !important; padding-top: 15px !important; line-height: 1.2; }
         }
 
         .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 300px; background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 0; pointer-events: none; opacity: 0.1; }
         .boleta-top-code { position: absolute; top: 20px; right: 30px; font-size: 12px; font-weight: bold; }
+        
         .boleta-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; position: relative; z-index: 10; }
         .logo-box { width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--gold); overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; }
         .logo-box img { width: 100%; height: 100%; object-fit: contain; }
@@ -107,7 +144,7 @@
 <div class="container" id="calcView">
     <button class="settings-btn" onclick="toggleConfig()">⚙️</button>
     <h1>Dazoru Projects</h1>
-    <p class="subtitle">Sistema Universal v13.3</p>
+    <p class="subtitle">Sistema Universal v13.9</p>
 
     <div id="configPanel">
         <div class="config-title">🏢 DATOS DE EMPRESA</div>
@@ -291,7 +328,7 @@
         localStorage.setItem('d_op', val); 
     }
 
-    // 2. LÓGICA DE PRECIOS V13.3 (CALIBRADA PARA QUE GRANDE > CHICO)
+    // 2. LÓGICA DE PRECIOS V13.3 (CONSERVADA)
     function calc() {
         const mat = document.getElementById('material').value;
         const formaEl = document.querySelector('input[name="forma"]:checked');
@@ -324,14 +361,14 @@
                 const acaEl = document.querySelector('input[name="acabado"]:checked');
                 const aca = acaEl ? acaEl.value : 'pul';
                 let extra = 0;
-                if(aca === 'bis1') extra = 25; // 40 + 25 = 65
+                if(aca === 'bis1') extra = 25; 
                 else if(aca === 'bis2') extra = 45;
                 precioUni = baseRef + extra;
             } else {
                 precioUni = calcularDinamico(ancho, alto, forma, mat);
             }
         }
-        // C) DINÁMICO (PRECIOS AJUSTADOS PARA QUE NO CAIGAN)
+        // C) DINÁMICO
         else {
             precioUni = calcularDinamico(ancho, alto, forma, mat);
         }
@@ -365,10 +402,9 @@
         let area = (w * h) / 10000;
         let perim = (forma === 'rect') ? (w*2 + h*2)/100 : (Math.PI * w)/100;
         
-        // --- AQUÍ ESTÁ EL AJUSTE CLAVE ---
-        let precioM2 = 120; // 3mm base
-        if(mat === '4mm') precioM2 = 160; // SUBIDO DE 120 A 160 PARA MANTENER MARGEN
-        if(mat === 'opti') precioM2 = 300; // SUBIDO DE 288 A 300
+        let precioM2 = 120;
+        if(mat === '4mm') precioM2 = 160; 
+        if(mat === 'opti') precioM2 = 300; 
         
         if(forma === 'circ') {
             area = (Math.PI * Math.pow(w/2, 2)) / 10000; 
